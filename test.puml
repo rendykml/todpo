@@ -1,0 +1,88 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam style strictuml
+
+' =====================
+' USER & ROLE
+' =====================
+class User {
+  id
+  name
+  email
+  +login()
+  +logout()
+}
+
+class Role {
+  id
+  name
+  description
+}
+
+User "1" -- "1" Role : has
+
+' =====================
+' PRODUCT & CATEGORY
+' =====================
+class Product {
+  id
+  sku
+  name
+  price
+  cost
+  stock
+  minStock
+  +updateStock()
+}
+
+class Category {
+  id
+  name
+  description
+}
+
+Product "*" -- "1" Category : belongs to
+
+' =====================
+' SALES
+' =====================
+class Sale {
+  id
+  invoiceNumber
+  date
+  total
+  paymentMethod
+  +calculateTotal()
+}
+
+class SaleItem {
+  id
+  quantity
+  price
+  subtotal
+}
+
+User "1" -- "*" Sale : creates
+Sale "1" -- "*" SaleItem : contains
+SaleItem "*" -- "1" Product : references
+
+' =====================
+' STOCK MANAGEMENT
+' =====================
+class StockLog {
+  id
+  type
+  quantity
+  date
+}
+
+class Supplier {
+  id
+  name
+  contact
+}
+
+Product "1" -- "*" StockLog : tracked by
+Supplier "1" -- "*" StockLog : supplies
+
+@enduml
