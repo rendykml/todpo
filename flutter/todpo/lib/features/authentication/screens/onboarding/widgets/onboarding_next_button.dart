@@ -10,7 +10,7 @@ class OnBoardingNextButton extends StatelessWidget {
     final dark = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return Positioned(
       right: 24,
-      bottom: MediaQuery.of(context).size.height * 0.1 + 18,
+      bottom: MediaQuery.of(context).size.height * 0.1 + 24,
       child: ElevatedButton(
         onPressed: () => OnBoardingController.instance.nextPage(),
         style: ElevatedButton.styleFrom(
@@ -21,7 +21,7 @@ class OnBoardingNextButton extends StatelessWidget {
         child: Icon(
           Iconsax.arrow_right_3,
           color: dark ? Colors.black : Colors.white,
-          size: 28,
+          size: 24,
         ),
       ),
     );
