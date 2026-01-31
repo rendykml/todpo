@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
   try {
-    const { username, password, nama, email } = req.body;
+    const { username, password, first_name, last_name, email } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({ message: "Username & password wajib" });
@@ -21,9 +21,13 @@ exports.register = async (req, res) => {
     const user = await User.create({
       username,
       password: hashedPassword,
-      nama,
-      email
+      first_name,
+      last_name,
+      email,
     });
+    if (!username || !password || !first_name || !last_name || !email) {
+      return res.status(400).json({ message: "Data tidak lengkap" });
+    }
 
     res.status(201).json({ message: "Register berhasil" });
   } catch (error) {
@@ -48,11 +52,9 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Password salah" });
     }
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
 
     res.json({
       message: "Login berhasil",
@@ -60,8 +62,9 @@ exports.login = async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        nama: user.nama
-      }
+        first_name: user.first_name,
+        last_name: user.last_name,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
