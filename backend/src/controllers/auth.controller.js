@@ -1,9 +1,11 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const connectDB = require("../config/db");
 
 exports.register = async (req, res) => {
   try {
+    await connectDB();
     const { username, password, first_name, last_name, email } = req.body;
 
     if (!username || !password) {
