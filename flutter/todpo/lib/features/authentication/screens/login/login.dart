@@ -1,8 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import '../signup/signup.dart';
+import '../../../../services/auth_service.dart';
+import '../../../../utils/token_storage.dart';
+import '../home/home_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  bool isLoading = false;
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,15 +74,18 @@ class LoginScreen extends StatelessWidget {
                     children: [
                       //email field
                       TextFormField(
+                        controller: usernameController,
                         decoration: InputDecoration(
                           prefixIcon: Icon(Iconsax.direct_right),
-                          labelText: 'Email',
+                          labelText: 'Username',
                         ),
                       ),
                       SizedBox(height: 16.0),
 
                       //password field
                       TextFormField(
+                        controller: passwordController,
+                        obscureText: true,
                         decoration: const InputDecoration(
                           prefixIcon: Icon(Iconsax.password_check),
                           labelText: 'Password',
@@ -111,11 +135,63 @@ class LoginScreen extends StatelessWidget {
                               92,
                             ),
                           ),
-                          onPressed: () {},
-                          child: Text(
-                            'Sign In',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          onPressed: () async {
+                            setState(() => isLoading = true);
+
+                            try {
+                              final response = await AuthService.login(
+                                username: usernameController.text,
+                                password: passwordController.text,
+                              );
+
+                              if (response['token'] != null) {
+                                final token = response['token'];
+
+                                await TokenStorage.saveToken(token);
+
+                                if (!mounted) return;
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Login berhasil'),
+                                  ),
+                                );
+
+                                // TODO: pindah ke HomeScreen
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const HomeScreen(),
+                                  ),
+                                );
+                              }
+                              // TODO: simpan token & pindah halaman
+                              else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      response['message'] ?? 'Login gagal',
+                                    ),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error: $e')),
+                              );
+                            }
+
+                            setState(() => isLoading = false);
+                          },
+
+                          child: isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Text(
+                                  'Sign In',
+                                  style: TextStyle(color: Colors.white),
+                                ),
                         ),
                       ),
                       SizedBox(height: 16.0),
@@ -127,7 +203,14 @@ class LoginScreen extends StatelessWidget {
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RegisterScreen(),
+                              ),
+                            );
+                          },
                           child: Text(
                             'Create Account',
                             style: Theme.of(context).textTheme.labelLarge,
