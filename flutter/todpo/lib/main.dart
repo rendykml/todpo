@@ -28,7 +28,7 @@ class App extends StatelessWidget {
         brightness: Brightness.dark,
         primarySwatch: Colors.indigo,
       ),
-      home: OnBoardingScreen(),
+      home: OnBoardingScreen(), 
     );
   }
 }
