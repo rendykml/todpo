@@ -38,6 +38,7 @@ exports.register = async (req, res) => {
 };
 exports.login = async (req, res) => {
   try {
+    await connectDB();
     const { username, password } = req.body;
 
     if (!username || !password) {
