@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:todpo/navigation_menu.dart';
 import '../signup/signup.dart';
-import '../../../../services/auth_service.dart';
+import '../../../../services/auth_services.dart';
 import '../../../../utils/token_storage.dart';
-import '../home/home_screen.dart';
+import 'package:get/get.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -128,12 +129,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: OutlinedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(
-                              255,
-                              157,
-                              92,
-                              92,
-                            ),
+                            backgroundColor: dark
+                                ? const Color.fromARGB(255, 255, 255, 255)
+                                : const Color.fromARGB(255, 0, 0, 0),
+                            // backgroundColor: const Color.fromARGB(
+                            //   255,
+                            //   157,
+                            //   92,
+                            //   92,
+                            // ),
                           ),
                           onPressed: () async {
                             setState(() => isLoading = true);
@@ -144,29 +148,31 @@ class _LoginScreenState extends State<LoginScreen> {
                                 password: passwordController.text,
                               );
 
-                              if (response['token'] != null) {
+                              if (response['token'] != null &&
+                                  response['user'] != null) {
                                 final token = response['token'];
+                                final userId = response['user']['id'];
 
                                 await TokenStorage.saveToken(token);
+                                await TokenStorage.saveUserId(userId);
 
                                 if (!mounted) return;
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Login berhasil'),
-                                  ),
-                                );
+                                // PILIH SATU SAJA ⬇️
 
-                                // TODO: pindah ke HomeScreen
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const HomeScreen(),
-                                  ),
-                                );
-                              }
-                              // TODO: simpan token & pindah halaman
-                              else {
+                                // 🔹 Kalau pakai Navigator
+                                // Navigator.pushReplacement(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (_) => const HomeScreen(),
+                                //   ),
+                                // );
+
+                                // 🔹 ATAU kalau pakai GetX
+                                Get.offAll(() => const NavigationMenu());
+                              } else {
+                                if (!mounted) return;
+
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
@@ -176,6 +182,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                               }
                             } catch (e) {
+                              if (!mounted) return;
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Error: $e')),
                               );
@@ -188,9 +196,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? const CircularProgressIndicator(
                                   color: Colors.white,
                                 )
-                              : const Text(
+                              : Text(
                                   'Sign In',
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                    color: dark ? Colors.black : Colors.white,
+                                  ),
                                 ),
                         ),
                       ),
