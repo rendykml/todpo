@@ -7,10 +7,18 @@ exports.getUserStats = async (req, res) => {
 
     const now = new Date();
 
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - 6);
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfDayUTC = new Date();
+    startOfDayUTC.setUTCHours(0, 0, 0, 0);
+
+    const startOfWeekUTC = new Date();
+    startOfWeekUTC.setUTCDate(startOfWeekUTC.getUTCDate() - 6);
+    startOfWeekUTC.setUTCHours(0, 0, 0, 0);
+
+    const startOfMonthUTC = new Date(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      1,
+    );
 
     const baseQuery = {
       user: new mongoose.Types.ObjectId(userId),
@@ -20,17 +28,17 @@ exports.getUserStats = async (req, res) => {
 
     const daily = await PomodoroSession.countDocuments({
       ...baseQuery,
-      createdAt: { $gte: startOfDay },
+      createdAt: { $gte: startOfDayUTC },
     });
 
     const weekly = await PomodoroSession.countDocuments({
       ...baseQuery,
-      createdAt: { $gte: startOfWeek },
+      createdAt: { $gte: startOfWeekUTC },
     });
 
     const monthly = await PomodoroSession.countDocuments({
       ...baseQuery,
-      createdAt: { $gte: startOfMonth },
+      createdAt: { $gte: startOfMonthUTC },
     });
 
     const average = Number((weekly / 7).toFixed(1));
