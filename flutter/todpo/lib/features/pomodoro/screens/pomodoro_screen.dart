@@ -6,6 +6,7 @@ import '../../../models/task_model.dart';
 import '../../../utils/token_storage.dart';
 import '../../../services/session_services.dart';
 import '../../task/task_controller.dart';
+import '../../../services/task_services.dart';
 
 enum PomodoroMode { focus, shortBreak, longBreak }
 
@@ -95,7 +96,6 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     if (_mode == PomodoroMode.focus) {
       _currentCycle++;
 
-      // kirim session focus
       await SessionService.createSession(
         token: token,
         taskId: widget.task.id,
@@ -105,8 +105,26 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
         status: "selesai",
       );
 
-      // REFRESH TASK LIST
+      await TaskService.updateTask(token, widget.task.id, {
+        "completedCycle": _currentCycle,
+      });
+
+      // 2. CEK APAKAH TARGET SUDAH TERCAPAI
+      if (_currentCycle >= widget.task.targetCycle) {
+        // Tandai task complete di server
+        await _completeTask(token);
+
+        if (!mounted) return;
+
+        await context.read<TaskController>().loadTasks(token);
+
+        Navigator.pop(context);
+        return;
+      }
+
+      // 3. JIKA BELUM SELESAI, LANJUT KE BREAK
       if (mounted) {
+        // Update UI l
         await context.read<TaskController>().loadTasks(token);
       }
 
@@ -116,7 +134,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
         _setMode(PomodoroMode.shortBreak);
       }
     } else {
-      // kirim break session
+      // LOGIKA BREAK
       await SessionService.createSession(
         token: token,
         taskId: widget.task.id,
@@ -125,13 +143,24 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
         duration: _mode == PomodoroMode.shortBreak ? 5 : 15,
         status: "selesai",
       );
-      if (_currentCycle >= widget.task.targetCycle) {
-        if (!mounted) return;
-        Navigator.pop(context);
+
+      await TaskService.updateTask(token, widget.task.id, {
+        "completedCycle": _currentCycle,
+      });
+
+      if (mounted) {
+        await context.read<TaskController>().loadTasks(token);
       }
 
       _setMode(PomodoroMode.focus);
     }
+  }
+
+  Future<void> _completeTask(String token) async {
+    await TaskService.updateTask(token, widget.task.id, {
+      "status": "completed",
+      "completedCycle": _currentCycle,
+    });
   }
 
   void _setMode(PomodoroMode mode) {
@@ -155,11 +184,11 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   String get _modeText {
     switch (_mode) {
       case PomodoroMode.focus:
-        return "Fokus";
+        return "Focus";
       case PomodoroMode.shortBreak:
-        return "Istirahat Pendek";
+        return "Short Break";
       case PomodoroMode.longBreak:
-        return "Istirahat Panjang";
+        return "Long Break";
     }
   }
 

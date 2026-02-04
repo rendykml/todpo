@@ -38,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           padding: const EdgeInsets.only(
             bottom: 24,
             left: 24,
-            top: 56,
+            top: 82,
             right: 24,
           ),
           child: Column(
@@ -133,13 +133,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(
-                              255,
-                              157,
-                              92,
-                              92,
-                            ),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: dark
+                                ? const Color.fromARGB(255, 255, 255, 255)
+                                : const Color.fromARGB(255, 0, 0, 0),
                           ),
                           onPressed: isLoading
                               ? null

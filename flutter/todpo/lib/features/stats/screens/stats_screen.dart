@@ -32,42 +32,72 @@ class _StatsScreenState extends State<StatsScreen> {
     final controller = context.watch<StatsController>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Statistik Fokus")),
-      body: controller.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : controller.stats == null
-          ? const Center(child: Text("Belum ada data statistik"))
-          : Padding(
-              padding: const EdgeInsets.all(16),
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                children: [
-                  StatsCard(
-                    title: "Hari Ini",
-                    value: "${controller.stats!.daily} cycle",
-                    icon: Icons.today,
-                  ),
-                  StatsCard(
-                    title: "Minggu Ini",
-                    value: "${controller.stats!.weekly} cycle",
-                    icon: Icons.date_range,
-                  ),
-                  StatsCard(
-                    title: "Bulan Ini",
-                    value: "${controller.stats!.monthly} cycle",
-                    icon: Icons.calendar_month,
-                  ),
-                  StatsCard(
-                    title: "Rata-rata",
-                    value:
-                        "${controller.stats!.average.toStringAsFixed(1)} / hari",
-                    icon: Icons.trending_up,
-                  ),
-                ],
+      body: SafeArea(
+        child: controller.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : controller.stats == null
+            ? const Center(child: Text("No statistics available yet"))
+            : Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// ===== HEADER (Match Home Style)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Focus Overview",
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Text(
+                          "Your Statistics",
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    /// ===== GRID STATS
+                    Expanded(
+                      child: GridView.count(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        children: [
+                          StatsCard(
+                            title: "Today",
+                            value: "${controller.stats!.daily} Cycles",
+                            icon: Icons.today,
+                          ),
+
+                          StatsCard(
+                            title: "This Week",
+                            value: "${controller.stats!.weekly} Cycles",
+                            icon: Icons.date_range,
+                          ),
+
+                          StatsCard(
+                            title: "This Month",
+                            value: "${controller.stats!.monthly} Cycles",
+                            icon: Icons.calendar_month,
+                          ),
+
+                          StatsCard(
+                            title: "Daily Average",
+                            value:
+                                "${controller.stats!.average.toStringAsFixed(1)} / Day",
+                            icon: Icons.trending_up,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

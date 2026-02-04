@@ -202,22 +202,41 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     final token = await TokenStorage.getToken();
     if (token == null) return;
 
-    await context.read<TaskController>().updateTask(
-      token: token,
-      taskId: widget.task.id,
-      data: {
-        "judul_task": _titleController.text,
-        "deskripsi": _descController.text,
-        "schedule_type": _scheduleType,
-        "start_date": _startDate?.toIso8601String(),
-        "deadline": _deadline?.toIso8601String(),
-        "target_cycle": _targetCycle,
-        "priority": _priority,
-        "visibility": _visibility,
-      },
-    );
+    Map<String, dynamic> dataToUpdate = {
+      "judul_task": _titleController.text,
+      "deskripsi": _descController.text,
+      "schedule_type": _scheduleType,
+      "start_date": _startDate?.toIso8601String(),
+      "deadline": _deadline?.toIso8601String(),
+      "target_cycle": _targetCycle,
+      "priority": _priority,
+      "visibility": _visibility,
+    };
+
+    int currentProgress = widget.task.completedCycle;
+
+    if (_targetCycle > currentProgress) {
+      dataToUpdate['status'] = 'ongoing';
+    } else if (_targetCycle <= currentProgress) {
+      dataToUpdate['status'] = 'completed';
+    }
 
     if (!mounted) return;
-    Navigator.pop(context);
+
+    try {
+      await context.read<TaskController>().updateTask(
+        token: token,
+        taskId: widget.task.id,
+        data: dataToUpdate,
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal update task: $e")));
+    }
   }
 }

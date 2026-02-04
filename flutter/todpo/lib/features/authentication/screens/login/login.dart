@@ -132,12 +132,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             backgroundColor: dark
                                 ? const Color.fromARGB(255, 255, 255, 255)
                                 : const Color.fromARGB(255, 0, 0, 0),
-                            // backgroundColor: const Color.fromARGB(
-                            //   255,
-                            //   157,
-                            //   92,
-                            //   92,
-                            // ),
                           ),
                           onPressed: () async {
                             setState(() => isLoading = true);

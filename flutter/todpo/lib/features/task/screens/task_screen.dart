@@ -16,11 +16,12 @@ class TasksScreen extends StatefulWidget {
 }
 
 class _TasksScreenState extends State<TasksScreen> {
+  String selectedFilter = "all";
+
   @override
   void initState() {
     super.initState();
 
-    // Load task setelah screen siap
     Future.microtask(() async {
       final token = await TokenStorage.getToken();
       if (token != null && mounted) {
@@ -29,40 +30,79 @@ class _TasksScreenState extends State<TasksScreen> {
     });
   }
 
+  String subTitle() {
+    return "Manage Tasks";
+  }
+
   @override
   Widget build(BuildContext context) {
-    final dark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     final controller = context.watch<TaskController>();
 
     return Scaffold(
       backgroundColor: dark ? Colors.black : Colors.white,
-      appBar: AppBar(
-        title: const Text('Tasks'),
 
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await TokenStorage.deleteToken();
-              if (!context.mounted) return;
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ================= PREMIUM APPBAR =================
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(subTitle()),
+                      Text(
+                        "Your Tasks",
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
 
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-                (route) => false,
-              );
-            },
+                  CircleAvatar(
+                    backgroundColor: dark ? Colors.white : Colors.black,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.logout,
+                        color: dark ? Colors.black : Colors.white,
+                      ),
+                      onPressed: () async {
+                        await TokenStorage.deleteToken();
+                        if (!context.mounted) return;
+
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // ================= FILTER =================
+              _buildFilter(),
+
+              const SizedBox(height: 20),
+
+              Expanded(child: _buildBody(controller)),
+            ],
           ),
-        ],
-      ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: _buildBody(controller),
+        ),
       ),
 
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+        backgroundColor: Colors.black,
         onPressed: () {
           Navigator.push(
             context,
@@ -74,24 +114,60 @@ class _TasksScreenState extends State<TasksScreen> {
     );
   }
 
+  // ================= FILTER WIDGET =================
+  Widget _buildFilter() {
+    return Row(
+      children: [
+        _filterChip("All", "all"),
+        _filterChip("Completed", "done"),
+        _filterChip("Ongoing", "pending"),
+      ],
+    );
+  }
+
+  Widget _filterChip(String label, String value) {
+    final selected = selectedFilter == value;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) {
+          setState(() {
+            selectedFilter = value;
+          });
+        },
+      ),
+    );
+  }
+
+  // ================= BODY =================
   Widget _buildBody(TaskController controller) {
     if (controller.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (controller.tasks.isEmpty) {
-      return const Center(
-        child: Text(
-          'Belum ada task.\nYuk buat task pertamamu 🚀',
-          textAlign: TextAlign.center,
-        ),
-      );
+    List filteredTasks = controller.tasks.where((task) {
+      if (selectedFilter == "done") {
+        return task.status == "completed";
+      }
+
+      if (selectedFilter == "pending") {
+        return task.status == "ongoing";
+      }
+
+      return true;
+    }).toList();
+
+    if (filteredTasks.isEmpty) {
+      return const Center(child: Text("No tasks found."));
     }
 
     return ListView.builder(
-      itemCount: controller.tasks.length,
-      itemBuilder: (context, index) {
-        return TaskCard(task: controller.tasks[index]);
+      itemCount: filteredTasks.length,
+      itemBuilder: (_, index) {
+        return TaskCard(task: filteredTasks[index]);
       },
     );
   }

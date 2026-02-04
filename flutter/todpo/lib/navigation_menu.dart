@@ -34,7 +34,7 @@ class NavigationMenu extends StatelessWidget {
             ),
             NavigationDestination(
               icon: Icon(Iconsax.activity4),
-              label: 'Statistik',
+              label: 'Stats',
             ),
             NavigationDestination(icon: Icon(Iconsax.user), label: 'Profile'),
           ],

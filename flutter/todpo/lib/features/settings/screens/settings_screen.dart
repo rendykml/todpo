@@ -12,7 +12,7 @@ class SettingsScreen extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings'), centerTitle: true),
+      appBar: AppBar(title: const Text('Profile'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -25,7 +25,7 @@ class SettingsScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 40,
                   backgroundColor: dark ? Colors.white24 : Colors.black12,
-                  backgroundImage: const AssetImage('images/profile.jpg'),
+                  backgroundImage: const AssetImage('assets/images/profile.jpg'),
                 ),
 
                 const SizedBox(height: 12),

@@ -94,7 +94,7 @@ class TaskDetailScreen extends StatelessWidget {
             // Button Pomodoro
             ElevatedButton.icon(
               icon: const Icon(Icons.timer),
-              label: const Text("Mulai Pomodoro"),
+              label: const Text("Start Pomodoro"),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
@@ -128,12 +128,12 @@ class TaskDetailScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Hapus Task"),
-        content: const Text("Apakah kamu yakin ingin menghapus task ini?"),
+        title: const Text("Delete Task"),
+        content: const Text("Are you sure you want to delete this task?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Batal"),
+            child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () async {
@@ -150,7 +150,7 @@ class TaskDetailScreen extends StatelessWidget {
               Navigator.pop(ctx); // tutup dialog
               Navigator.pop(context); // kembali ke task list
             },
-            child: const Text("Hapus", style: TextStyle(color: Colors.red)),
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
